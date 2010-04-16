@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: WebServer
+Bundle-SymbolicName: au.com.langdale.webserver
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: au.com.langdale.scalautil;bundle-version="1.0.0",
+ org.mortbay.jetty.server;bundle-version="6.1.15",
+ org.mortbay.jetty.util;bundle-version="6.1.15",
+ javax.servlet;bundle-version="2.5.0",
+ org.eclipse.core.runtime,
+ scala.library;bundle-version="2.7.7"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .
+Export-Package: au.com.langdale.webserver
