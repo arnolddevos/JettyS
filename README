@@ -1,0 +1,98 @@
+The aim of this pimped servlet API is to add the minimum to javax.servlet to
+scalaize it. There is no routing engine, no ORM layer, just the usual scala 
+pimping techniques. 
+
+One good idea is to recast the servlet service methods as:
+
+HttpRequest => HttpResponse => Unit
+
+Which then allows the Httpresponse => Unit part to be factored into stock
+objects called Responders. You can then write most service functions in the 
+form HttpRequest => Responder.
+
+The result is not to bad. It lets you write hello world like this: 
+
+get("/") { 
+    request => <h1>Hello {request("yourname") getOrElse "stranger"}!</h1>
+}
+
+The request is implicitly wrapped to allow easy parameter access
+request("yourname") and the result, a scala.xml.Node, is implicitly 
+converted to a Responder.
+
+OK, to be fair, lets expand that out with all the imports and proper XHTML:
+
+package example
+import au.com.langdale.webserver._
+import Driver._       // start and stop Jetty
+import Connectors._   // Jetty-specific connection methods such as listen()
+import Handlers._     // Jetty-specific binding methods get("...") and
+post("...")
+import Responders._   // generic servlet Responders and implicit conversions for
+responses
+import Requests._     // generic servlet request extractors and wrapper 
+
+object HelloWorld {
+  val host = "127.0.0.1"
+  val port = 9986
+  
+  // tell Jetty where to receive connections
+  listen(host, port)
+
+  // may be omitted since this is the default for XML responses
+  implicit val contentType = ContentType("application/xhtml+xml")
+  
+  // hello world server
+  get("/test") { request =>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head><title>The Test Page</title></head>
+      <body>
+        <h1>Test</h1>
+        <p>Hello {request("yourname") getOrElse "stranger"}!</p>
+      </body>
+    </html>
+  }
+
+  def main(args: Array[String]) = { start; join }
+}
+
+Instead of querying the (wrapped) HttpRequest, you can use pattern matching.
+Here is a KML service for google earth that shows this:
+
+implicit val contentType = ContentType("application/vnd.google-earth.kml+xml")
+// note 1
+
+get("/cafe") {
+  case Params(BBox(w, s, e, n)) =>   // note 2
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Document>
+      {  
+        for((name, lon, lat) <- findCafesIn(w, s, e, n)) yield
+        <Placemark>
+          <name>{name}</name>
+          <Point>
+            <coordinates>{lon},{lat},0</coordinates>
+          </Point>
+        </Placemark>
+      }
+      </Document>
+    </kml>
+      
+  case _ => 404 // note 3
+} 
+
+
+The example extracts the coordinates of a bounding box (w, s, e, n) from a
+Google Earth request and uses them to find a collection of locations via
+findCafes(..), which is supposedly a spatial query on some data source.  
+
+The locations are wrapped in KML markup and returned. 
+
+This shows how to:
+
+ * set an implicit content type (note 1); 
+ * use extractors to obtain request parameters (note 2); 
+ * implicitly convert responses such as XML or integers. 
+   e.g an integer gets converted to an error response (note 3). 
+
+There is a longer writeup here: http://notes.langdale.com.au/Pimping_Servlet_and_Jetty.html
