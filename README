@@ -6,19 +6,19 @@ One good idea is to recast the servlet service methods as:
 
 HttpRequest => HttpResponse => Unit
 
-Which then allows the Httpresponse => Unit part to be factored into stock
-objects called Responders. You can then write most service functions in the 
-form HttpRequest => Responder.
+The Httpresponse => Unit part can then be factored into stock
+objects called Responders. You can then concentrate on the 
+HttpRequest => Responder part.
 
-The result is not to bad. It lets you write hello world like this: 
+The result is not too shabby. It lets you write hello world like this: 
 
 get("/") { 
     request => <h1>Hello {request("yourname") getOrElse "stranger"}!</h1>
 }
 
-The request is implicitly wrapped to allow easy parameter access
-request("yourname") and the result, a scala.xml.Node, is implicitly 
-converted to a Responder.
+Here the request is implicitly wrapped to allow easy parameter access
+as in request("yourname") and the result, a scala.xml.Node, is implicitly 
+converted to a suitable Responder.
 
 OK, to be fair, lets expand that out with all the imports and proper XHTML:
 
@@ -80,7 +80,6 @@ get("/cafe") {
       
   case _ => 404 // note 3
 } 
-
 
 The example extracts the coordinates of a bounding box (w, s, e, n) from a
 Google Earth request and uses them to find a collection of locations via
