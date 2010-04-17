@@ -4,11 +4,11 @@ pimping techniques.
 
 One good idea is to recast the servlet service methods as:
 
-HttpRequest => HttpResponse => Unit
+HttpServletRequest => HttpServletResponse => Unit
 
-The Httpresponse => Unit part can then be factored into stock
+The HttpServletResponse => Unit part can then be factored into stock
 objects called Responders. You can then concentrate on the 
-HttpRequest => Responder part.
+HttpServletRequest => Responder part.
 
 The result is not too shabby. It lets you write hello world like this: 
 
@@ -26,11 +26,9 @@ package example
 import au.com.langdale.webserver._
 import Driver._       // start and stop Jetty
 import Connectors._   // Jetty-specific connection methods such as listen()
-import Handlers._     // Jetty-specific binding methods get("...") and
-post("...")
-import Responders._   // generic servlet Responders and implicit conversions for
-responses
-import Requests._     // generic servlet request extractors and wrapper 
+import Handlers._     // Jetty-specific binding methods get("...") and post("...")
+import Responders._   // generic responders and implicit conversions for responses
+import Requests._     // generic request extractors and wrapper 
 
 object HelloWorld {
   val host = "127.0.0.1"
@@ -56,7 +54,7 @@ object HelloWorld {
   def main(args: Array[String]) = { start; join }
 }
 
-Instead of querying the (wrapped) HttpRequest, you can use pattern matching.
+Instead of querying the (wrapped) HttpServletRequest, you can use pattern matching.
 Here is a KML service for google earth that shows this:
 
 implicit val contentType = ContentType("application/vnd.google-earth.kml+xml")
