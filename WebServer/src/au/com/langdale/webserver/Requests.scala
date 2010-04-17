@@ -45,4 +45,6 @@ object Requests {
     def apply(name: String): Option[String] = { val value = inner.getParameter(name); if(value == null) None else Some(value) }
     def params = jcl.Map(inner.getParameterMap).asInstanceOf[Parameters]
   }
+  
+  implicit def toRichRequest(inner: HttpServletRequest) = new RichRequest(inner)
 }
