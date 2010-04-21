@@ -38,7 +38,7 @@ object Requests {
   }
   
   object & {
-    def unapply(params: Parameters): Option[(Parameters, Parameters)] = Some(params, params)
+    def unapply[Parameters](params: Parameters): Option[(Parameters, Parameters)] = Some(params, params)
   }
   
   class RichRequest(inner: HttpServletRequest) {
