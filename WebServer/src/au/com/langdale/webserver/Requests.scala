@@ -5,7 +5,7 @@ import scala.collection.{Map, jcl}
 object Requests {
   def toLong(x: String) = try { Some(x.toLong) } catch { case _:NumberFormatException => None }  
   def toDouble(x: String) = try { Some(x.toDouble) } catch { case _:NumberFormatException => None }  
-  
+
   type Parameters = Map[String,Seq[String]]
   
   object BBox {
@@ -13,6 +13,10 @@ object Requests {
       params get "BBOX" flatMap (_ firstOption) flatMap { _ split ',' flatMap toDouble match { case Seq(w, s, e, n) => Some((w, s, e, n)) case _ => None }}
     }
   }
+  
+  case class StringSeqParam(name: String) {
+    def unapplySeq(params: Parameters): Option[Seq[Seq[String]]] = params get name map { _ map { _ split ',' }} 
+  } 
   
   case class StringParam(name: String) {
     def unapplySeq(params: Parameters) = params get name 
