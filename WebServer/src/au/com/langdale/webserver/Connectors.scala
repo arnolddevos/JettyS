@@ -14,6 +14,7 @@ object Connectors {
     val connect = new BlockingChannelConnector
     connect.setPort(port)
     connect.setHost(host)
+    connect.setLowResourceMaxIdleTime(0)
     Driver.server.addConnector(connect)
     
   }
