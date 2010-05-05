@@ -19,7 +19,7 @@ object Driver {
   
   object requestLogger extends AbstractHandler {
     def handle( target: String, request: HttpServletRequest, response: HttpServletResponse, kind: Int) {
-      Log info request.getMethod + " " + target
+      Log debug request.getMethod + " " + target
     }
   }
 }
