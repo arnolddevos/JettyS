@@ -1,4 +1,5 @@
-package au.com.langdale.webserver
+package au.com.langdale
+package webserver
 
 import org.mortbay._
 import jetty.Server

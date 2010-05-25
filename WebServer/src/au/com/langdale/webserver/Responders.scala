@@ -1,4 +1,5 @@
-package au.com.langdale.webserver
+package au.com.langdale
+package webserver
 
 import scala.xml.Node
 import javax.servlet.http.{HttpServletResponse}

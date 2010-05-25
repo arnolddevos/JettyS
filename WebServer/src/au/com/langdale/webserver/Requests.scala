@@ -1,37 +1,48 @@
-package au.com.langdale.webserver
+package au.com.langdale
+package webserver
 import javax.servlet.http.{HttpServletRequest}
-import scala.collection.{Map, jcl}
+import scala.collection.mutable.{Map}
+import scala.collection.JavaConversions._
 
 object Requests {
   def toLong(x: String) = try { Some(x.toLong) } catch { case _:NumberFormatException => None }  
   def toDouble(x: String) = try { Some(x.toDouble) } catch { case _:NumberFormatException => None }  
 
-  type Parameters = Map[String,Seq[String]]
+  type Parameters = Map[String, Array[String]]
   
   object BBox {
     def unapply(params: Parameters): Option[(Double, Double, Double, Double)] = {
-      params get "BBOX" flatMap (_ firstOption) flatMap { _ split ',' flatMap toDouble match { case Seq(w, s, e, n) => Some((w, s, e, n)) case _ => None }}
+      params get "BBOX" flatMap (_ firstOption) flatMap { _ split ',' flatMap toDouble match { case Array(w, s, e, n) => Some((w, s, e, n)) case _ => None }}
     }
   }
   
   case class StringSeqParam(name: String) {
-    def unapplySeq(params: Parameters): Option[Seq[Seq[String]]] = params get name map { _ map { _ split ',' }} 
+    def unapplySeq(params: Parameters): Option[Seq[Seq[String]]] = {
+      params get name map { as: Array[String] =>
+        val ss:Seq[String] = as 
+        ss map { s: String => 
+          val ps = s.split( ',' )
+          val sp: Seq[String] =ps 
+          sp
+        }
+      }
+    } 
   } 
   
   case class StringParam(name: String) {
-    def unapplySeq(params: Parameters) = params get name 
+    def unapplySeq(params: Parameters): Option[Seq[String]] = params get name map { ss => ss: Seq[String] }
   } 
   
   case class DoubleParam(name: String) {
-    def unapplySeq(params: Parameters) = params get name map (_ flatMap toDouble)
+    def unapplySeq(params: Parameters): Option[Seq[Double]] = params get name map (_ flatMap toDouble)
   } 
   
   case class LongParam(name: String) {
-    def unapplySeq(params: Parameters) = params get name map (_ flatMap toLong)
+    def unapplySeq(params: Parameters): Option[Seq[Long]] = params get name map (_ flatMap toLong)
   } 
   
   object Params {
-    def unapply(request: HttpServletRequest) = Some(jcl.Map(request.getParameterMap).asInstanceOf[Parameters])
+    def unapply(request: HttpServletRequest) = Some(request.getParameterMap.asInstanceOf[java.util.Map[String, Array[String]]]: Parameters)
   }
   
   object PathInfo {
@@ -42,12 +53,12 @@ object Requests {
   }
   
   object & {
-    def unapply[Parameters](params: Parameters): Option[(Parameters, Parameters)] = Some(params, params)
+    def unapply[A](a: A): Option[(A, A)] = Some(a, a)
   }
   
   class RichRequest(inner: HttpServletRequest) {
     def apply(name: String): Option[String] = { val value = inner.getParameter(name); if(value == null) None else Some(value) }
-    def params = jcl.Map(inner.getParameterMap).asInstanceOf[Parameters]
+    def params: Parameters = inner.getParameterMap.asInstanceOf[java.util.Map[String, Array[String]]]
   }
   
   implicit def toRichRequest(inner: HttpServletRequest) = new RichRequest(inner)
